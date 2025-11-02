@@ -1,0 +1,53 @@
+from django.shortcuts import render
+
+# Create your views here.
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from celery.result import AsyncResult
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import AllowAny
+from django.views.decorators.csrf import csrf_exempt
+from .tasks import generate_mockup
+from .models import Mockup
+
+
+# API view to start the celery task. 
+class StartTaskAPIView(APIView):
+    def post(self, request):
+        color = request.data.get("color", "blue")
+        text = request.data.get("text", "My T-Shirt")
+        print(text)
+        task = generate_mockup.delay(text)
+        return Response({"task_id": task.id, "status": "PENDING"}, status=status.HTTP_202_ACCEPTED)
+
+
+# API view to check the status of an Celery task.
+class TaskStatusAPIView(APIView):
+    def get(self, request, task_id):
+        ar = AsyncResult(task_id)
+        response = {"task_id": task_id, "status": ar.status}
+        if ar.status == "SUCCESS":
+            response["result"] = ar.result  
+        elif ar.status == "FAILURE":
+            response["error"] = str(ar.result)
+        return Response(response)
+
+
+#retrieving created tshirts data 
+class MockupHistoryAPIView(APIView):
+    def get(self, request):
+        mockups = Mockup.objects.all().order_by("-created_at")
+        results = [
+            {
+                "id": m.id,
+                "text": m.text,
+                "image_url": m.image_url,
+                "font": m.font,
+                "text_color": m.text_color,
+                "shirt_color": m.shirt_color,
+                "created_at": m.created_at
+            }
+            for m in mockups
+        ]
+        return Response({"results": results})
