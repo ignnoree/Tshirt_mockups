@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from .tasks import generate_mockup
 from .models import Mockup
-
+from rest_framework.pagination import PageNumberPagination
 
 # API view to start the celery task. 
 class StartTaskAPIView(APIView):
@@ -38,6 +38,11 @@ class TaskStatusAPIView(APIView):
 class MockupHistoryAPIView(APIView):
     def get(self, request):
         mockups = Mockup.objects.all().order_by("-created_at")
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 10  # optional (overrides settings.py)
+        result_page = paginator.paginate_queryset(mockups, request)
+
         results = [
             {
                 "id": m.id,
@@ -48,6 +53,6 @@ class MockupHistoryAPIView(APIView):
                 "shirt_color": m.shirt_color,
                 "created_at": m.created_at
             }
-            for m in mockups
+            for m in result_page
         ]
-        return Response({"results": results})
+        return paginator.get_paginated_response(results)
