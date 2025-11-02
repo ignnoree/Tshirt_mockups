@@ -7,13 +7,14 @@ import re
 
 
 @shared_task
-def generate_mockup(text,text_color):
+def generate_mockup(text,text_color,colors=None):
 
     #if the color is not valid, we will use the default color(blue)
     if not re.fullmatch(r"#([0-9a-fA-F]{6})", text_color):
         text_color = "#0000FF"  
 
-    colors = ["white", "black", "red", "blue"]
+    if not colors:
+        colors = ["white", "black", "red", "blue"]
     output_paths = []
     #replacing spaces with underscores
     safe_text = text.replace(" ", "_")

@@ -17,8 +17,9 @@ class StartTaskAPIView(APIView):
     def post(self, request):
         text = request.data.get("text", "My T-Shirt")
         text_color=request.data.get("text_color", "#0000FF")
+        colors = request.data.get("colors", None)
         print(text)
-        task = generate_mockup.delay(text,text_color)
+        task = generate_mockup.delay(text,text_color,colors)
         return Response({"task_id": task.id, "status": "PENDING"}, status=status.HTTP_202_ACCEPTED)
 
 
