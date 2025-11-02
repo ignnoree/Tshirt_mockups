@@ -15,10 +15,10 @@ from .models import Mockup
 # API view to start the celery task. 
 class StartTaskAPIView(APIView):
     def post(self, request):
-        color = request.data.get("color", "blue")
         text = request.data.get("text", "My T-Shirt")
+        text_color=request.data.get("text_color", "#0000FF")
         print(text)
-        task = generate_mockup.delay(text)
+        task = generate_mockup.delay(text,text_color)
         return Response({"task_id": task.id, "status": "PENDING"}, status=status.HTTP_202_ACCEPTED)
 
 

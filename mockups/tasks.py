@@ -3,8 +3,16 @@ from celery import shared_task
 import time
 from PIL import Image, ImageDraw, ImageFont
 from .models import Mockup
+import re 
+
+
 @shared_task
-def generate_mockup(text):
+def generate_mockup(text,text_color):
+
+    #if the color is not valid, we will use the default color(blue)
+    if not re.fullmatch(r"#([0-9a-fA-F]{6})", text_color):
+        text_color = "#0000FF"  
+
     colors = ["white", "black", "red", "blue"]
     output_paths = []
     #replacing spaces with underscores
@@ -20,7 +28,11 @@ def generate_mockup(text):
         # Currently this `font` variable isn't used beyond drawing, 
         # and the DB font field is hardcoded. Might be useful later if we allow custom fonts.
         font = ImageFont.truetype("arial.ttf", 40)
-        draw.text((200, 300), text, fill=(0, 0, 255, 255))
+        
+        #converting the color to hex color 
+        hex_color = text_color.lstrip("#")
+        rgba_color = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4)) + (255,)
+        draw.text((200, 300), text, fill=rgba_color)
 
         combined = Image.alpha_composite(template, txt_layer)
 
