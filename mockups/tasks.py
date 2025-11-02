@@ -47,7 +47,7 @@ def generate_mockup(text,text_color):
             text=text,
             image_url=f"http://127.0.0.1:8000/{output_path.replace('\\','/')}",
             font="arial",
-            text_color="#FFFFFF",
+            text_color=text_color,
             shirt_color=color
         )
     return output_paths
