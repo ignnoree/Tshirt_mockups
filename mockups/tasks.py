@@ -20,7 +20,7 @@ def generate_mockup(text):
         # Currently this `font` variable isn't used beyond drawing, 
         # and the DB font field is hardcoded. Might be useful later if we allow custom fonts.
         font = ImageFont.truetype("arial.ttf", 40)
-        draw.text((200, 300), text, fill=(255, 255, 255, 255))
+        draw.text((200, 300), text, fill=(0, 0, 255, 255))
 
         combined = Image.alpha_composite(template, txt_layer)
 
